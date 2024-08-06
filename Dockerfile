@@ -9,6 +9,8 @@ COPY requirements.txt .
 # Install the dependencies
 RUN pip install -r requirements.txt
 
+EXPOSE 8000
+
 # Copy the script
 COPY . .
 
