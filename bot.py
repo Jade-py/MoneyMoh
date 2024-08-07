@@ -12,7 +12,7 @@ env = Env()
 env.read_env()
 
 # Replace with your actual API endpoint
-API_ENDPOINT = "http://0.0.0.0:8000/"
+API_ENDPOINT = "http://web:8000"
 
 # Replace with your Telegram Bot Token
 TOKEN = os.environ["BOT_TOKEN"]
