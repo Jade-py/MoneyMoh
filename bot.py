@@ -232,6 +232,7 @@ async def fetch_expenses(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
             if response.status_code == 200:
                 expenses = response.json().get('data', [])
+                print(expenses)
                 if expenses:
                     expense_text = []
                     for exp in expenses:
