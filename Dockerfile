@@ -27,6 +27,6 @@ ENV TEST_DATABASE_NAME=$TEST_DATABASE_NAME
 
 
 # Run the script when the container starts
-CMD gunicorn TelegramAI.wsgi:application --log-file -
+CMD gunicorn TelegramAI.wsgi:application --bind 127.0.0.1:8000
 
 CMD ["python", "bot.py"]
