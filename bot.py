@@ -12,7 +12,7 @@ env = Env()
 env.read_env()
 
 # Replace with your actual API endpoint
-API_ENDPOINT = "http://127.0.0.1:8080"
+API_ENDPOINT = "http://127.0.0.1:8000"
 
 # Replace with your Telegram Bot Token
 TOKEN = os.environ["BOT_TOKEN"]
@@ -289,7 +289,7 @@ def main() -> None:
     application.add_handler(conv_handler)
     application.add_handler(CallbackQueryHandler(retry, pattern='^retry$'))
 
-    application.run_polling()
+    application.run_webhook(listen="0.0.0.0", port=8080)()
 
 
 if __name__ == "__main__":
