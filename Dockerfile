@@ -25,8 +25,11 @@ ENV MYSQL_PORT=$MYSQL_PORT
 ENV MYSQL_USER=$MYSQL_USER
 ENV TEST_DATABASE_NAME=$TEST_DATABASE_NAME
 
+RUN echo '#!/bin/bash\n\
+gunicorn TelegramAI.wsgi:application --bind 127.0.0.1:8000 &\n\
+python bot.py' > start.sh
 
-# Run the script when the container starts
-CMD gunicorn TelegramAI.wsgi:application --bind 127.0.0.1:8000
+RUN chmod +x start.sh
 
-CMD ["python", "bot.py"]
+# Run the start script when the container starts
+CMD ["./start.sh"]
