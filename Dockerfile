@@ -9,7 +9,7 @@ COPY requirements.txt .
 # Install the dependencies
 RUN pip install -r requirements.txt
 
-EXPOSE 8000
+EXPOSE 8080
 
 # Copy the script
 COPY . .
@@ -27,6 +27,6 @@ ENV TEST_DATABASE_NAME=$TEST_DATABASE_NAME
 
 
 # Run the script when the container starts
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD gunicorn TelegramAI.wsgi:application --bind 0.0.0.0:8080
 
 CMD ["python", "bot.py"]
