@@ -12,9 +12,10 @@ def index(request):
 
 
 @api_view(['GET'])
-def get_data(request, year, month, day):
+def get_data(request, year, month, day, user):
     try:
-        data = BaseModel.objects.filter(date__year=year, date__month=month, date__day=day).values("event", "price", "date")
+        print(user)
+        data = BaseModel.objects.filter(date__year=year, date__month=month, date__day=day, user=user).values("event", "price", "date")
         serializer = bs(data, many=True)
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
     except Exception as e:

@@ -169,7 +169,8 @@ async def get_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         event = context.user_data['event']
         data = {
             'event': event,
-            'price': price
+            'price': price,
+            'user': update.effective_user.id
         }
 
         try:
@@ -225,10 +226,12 @@ async def fetch_expenses(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     a = []
 
     for date in selected_dates:
-        print(date)
         try:
+            user = update.effective_user.id
+            print('yeeeee')
+            print(user)
             year, month, day = date.split('-')
-            response = requests.get(f"{API_ENDPOINT}get/{year}/{month}/{day}")
+            response = requests.get(f"{API_ENDPOINT}get/{year}/{month}/{day}/{user}")
 
             if response.status_code == 200:
                 expenses = response.json().get('data', [])
@@ -290,7 +293,7 @@ def main() -> None:
     application.add_handler(conv_handler)
     application.add_handler(CallbackQueryHandler(retry, pattern='^retry$'))
 
-    application.run_webhook(listen="0.0.0.0", port=8080, webhook_url="https://moneymoh.onrender.com")()
+    application.run_polling()
 
 
 if __name__ == "__main__":

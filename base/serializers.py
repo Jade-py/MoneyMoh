@@ -5,7 +5,7 @@ from .models import BaseModel
 class BaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = BaseModel
-        fields = ('event', 'price', 'date')
+        fields = ('event', 'price', 'date', 'user')
 
     def validate_price(self, value):
         try:

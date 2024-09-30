@@ -16,6 +16,6 @@ urlpatterns = [
     path('', index),
     path('admin/', admin.site.urls),
     path('post/', post_data),
-    path('get/<int:year>/<int:month>/<int:day>', get_data),
+    path('get/<int:year>/<int:month>/<int:day>/<int:user>', get_data),
     path('get/today/', get_today)
 ]
