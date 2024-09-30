@@ -293,7 +293,7 @@ def main() -> None:
     application.add_handler(conv_handler)
     application.add_handler(CallbackQueryHandler(retry, pattern='^retry$'))
 
-    application.run_polling()
+    application.run_webhook(listen="0.0.0.0", port=8080, webhook_url="https://moneymoh.onrender.com")()
 
 
 if __name__ == "__main__":
