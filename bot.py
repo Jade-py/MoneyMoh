@@ -1,5 +1,6 @@
 import requests
 import os
+import pytz
 from datetime import datetime
 import calendar
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
@@ -239,7 +240,8 @@ async def fetch_expenses(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                     expense_text = []
                     for exp in expenses:
                         date_obj = datetime.fromisoformat(exp['date'].replace('Z', '+00:00'))
-                        formatted_date = date_obj.strftime("%d %b %H:%M")
+                        local_tz = pytz.timezone('Asia/Kolkata')  # Replace with your desired timezone
+                        formatted_date = date_obj.astimezone(local_tz).strftime("%d %b %H:%M")
                         expense_text.append(f"{exp['event']}: {exp['price']}Rs on {formatted_date}")
                     expense_text = "\n".join(expense_text)
                     a.append(expense_text)
