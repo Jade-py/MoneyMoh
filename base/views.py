@@ -5,6 +5,7 @@ from .models import BaseModel
 from .serializers import BaseSerializer as bs
 from datetime import date
 from django.http import HttpResponse
+import pytz
 
 
 def index(request):
@@ -29,10 +30,10 @@ def get_data(request, year, month, day, user):
             user=user
         ).values("event", "price", "date")
 
-        print(f"Querying for date range: {start_date} to {end_date}")
-        print(f"User: {user}")
-        print(f"Found records: {data.count()}")
-        print("SQL Query:", data.query)
+        local_tz = pytz.timezone('Asia/Kolkata')
+        data_list = list(data)
+        for item in data_list:
+            item['date'] = timezone.datetime.astimezone(item['date'], local_tz)
 
         serializer = bs(data, many=True)
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
