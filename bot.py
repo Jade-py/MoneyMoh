@@ -140,7 +140,7 @@ async def calendar_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         await query.edit_message_text("Operation cancelled. Type /start to begin again.")
         return ConversationHandler.END
 
-    return SELECT_DATE
+    return CHOOSING
 
 
 async def get_event(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -158,7 +158,7 @@ async def get_event(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         context.user_data['event'] = update.message.text
         await update.message.reply_text("Great! Now, what's the price?", reply_markup=reply_markup)
 
-    return PRICE
+    return CHOOSING
 
 async def get_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
@@ -270,7 +270,6 @@ async def retry(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
-    await query.answer()
     await query.edit_message_text("Operation cancelled. Type /start to begin again.")
     return ConversationHandler.END
 
