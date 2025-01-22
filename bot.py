@@ -281,15 +281,17 @@ def main() -> None:
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
         states={
-            CHOOSING: [CallbackQueryHandler(button_click)],
-            SELECT_DATE: [CallbackQueryHandler(calendar_handler)],
-            EVENT: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_event),
-                    CallbackQueryHandler(cancel, pattern='^cancel$')],
-            PRICE: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_price),
-                    CallbackQueryHandler(cancel, pattern='^cancel$')],
+            CHOOSING: [
+                CallbackQueryHandler(button_click, pattern='^(add|list)$'),
+                CallbackQueryHandler(calendar_handler, pattern='^date_'),
+                CallbackQueryHandler(fetch_expenses, pattern='^done$'),
+                CallbackQueryHandler(cancel, pattern='^cancel$'),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, get_event),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, get_price),
+            ],
         },
         fallbacks=[CommandHandler("cancel", cancel)],
-        per_message=True
+        conversation_timeout=86400,
     )
 
     application.add_handler(conv_handler)
