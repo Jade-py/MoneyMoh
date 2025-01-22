@@ -11,16 +11,34 @@ def index(request):
     return HttpResponse("Hello, world!")
 
 
+from django.utils import timezone
+from datetime import datetime
+from django.db.models import Q
+
+
 @api_view(['GET'])
 def get_data(request, year, month, day, user):
     try:
-        print(user)
-        data = BaseModel.objects.filter(date__year=year, date__month=month, date__day=day, user=user).values("event", "price", "date")
+        # Create date range in UTC
+        start_date = timezone.datetime(year, month, day, 0, 0, 0, tzinfo=timezone.timezone.utc)
+        end_date = timezone.datetime(year, month, day, 23, 59, 59, 999999, tzinfo=timezone.timezone.utc)
+
+        # Query using date range instead of individual fields
+        data = BaseModel.objects.filter(
+            date__range=(start_date, end_date),
+            user=user
+        ).values("event", "price", "date")
+
+        print(f"Querying for date range: {start_date} to {end_date}")
+        print(f"User: {user}")
+        print(f"Found records: {data.count()}")
+        print("SQL Query:", data.query)
+
         serializer = bs(data, many=True)
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
     except Exception as e:
-        print(e)
-        return Response(f'{e}', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        print(f"Error: {str(e)}")
+        return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])

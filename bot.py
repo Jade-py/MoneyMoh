@@ -159,7 +159,6 @@ async def get_event(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     return PRICE
 
-
 async def get_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
         price = float(update.message.text)
