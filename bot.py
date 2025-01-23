@@ -144,6 +144,8 @@ async def calendar_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
 
 async def get_event(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    if 'price' in context.user_data:
+        return CHOOSING
     keyboard = [
         [InlineKeyboardButton("Cancel", callback_data='cancel')]
     ]
@@ -159,6 +161,7 @@ async def get_event(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         await update.message.reply_text("Great! Now, what's the price?", reply_markup=reply_markup)
 
     return CHOOSING
+
 
 async def get_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
@@ -228,7 +231,6 @@ async def fetch_expenses(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     for date in selected_dates:
         try:
             user = update.effective_user.id
-            print('yeeeee')
             print(user)
             year, month, day = date.split('-')
             response = requests.get(f"{API_ENDPOINT}get/{year}/{month}/{day}/{user}")
