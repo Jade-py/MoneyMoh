@@ -19,7 +19,7 @@ API_ENDPOINT = "http://127.0.0.1:8000/"
 TOKEN = os.environ["BOT_TOKEN"]
 
 # Define conversation states
-CHOOSING, SELECT_LIST_TYPE, SELECT_DATE, EVENT, PRICE = range(5)
+CHOOSING = 0
 
 
 def create_calendar(year, month):
@@ -72,12 +72,12 @@ async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
 
     if query.data == 'add':
         await query.edit_message_text("Great! What's the event name?", reply_markup=reply_markup)
-        return EVENT
+        return CHOOSING
     elif query.data == 'list':
         now = datetime.now()
         calendar_markup = create_calendar(now.year, now.month)
         await query.edit_message_text("Please select date(s):", reply_markup=calendar_markup)
-        return SELECT_DATE
+        return CHOOSING
     elif query.data == 'cancel':
         await query.edit_message_text("Operation cancelled. Type /start to begin again")
         return ConversationHandler.END
@@ -85,7 +85,7 @@ async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         query = update.callback_query
         await query.answer()
         await query.edit_message_text("Let's try again. What's the event name?", reply_markup=reply_markup)
-        return EVENT
+        return CHOOSING
 
 
 async def calendar_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -204,7 +204,7 @@ async def get_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     except Exception as e:
         print(e)
         await update.message.reply_text("Invalid price. Please enter a number.")
-        return PRICE
+        return CHOOSING
 
 
 async def fetch_expenses(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -214,7 +214,7 @@ async def fetch_expenses(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     selected_dates = context.user_data.get('selected_dates', set())
     if not selected_dates:
         await query.edit_message_text("No dates selected. Please select dates first. /start again")
-        return SELECT_DATE
+        return CHOOSING
 
     print("Selected dates: ", selected_dates)
     keyboard = [
