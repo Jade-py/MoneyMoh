@@ -144,24 +144,62 @@ async def calendar_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
 
 async def get_event(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    if 'price' in context.user_data:
-        return CHOOSING
     keyboard = [
         [InlineKeyboardButton("Cancel", callback_data='cancel')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    if update.callback_query:
-        query = update.callback_query
-        await query.answer()
-        context.user_data['event'] = query.data
-        await query.edit_message_text("Great! Now, what's the price?", reply_markup=reply_markup)
-    else:
-        context.user_data['event'] = update.message.text
-        await update.message.reply_text("Great! Now, what's the price?", reply_markup=reply_markup)
+    # If previous event exists, this is a price entry
+    if 'event' in context.user_data:
+        try:
+            price = float(update.message.text)
+            context.user_data['price'] = price
 
+            # Send data to the API
+            event = context.user_data['event']
+            data = {
+                'event': event,
+                'price': price,
+                'user': update.effective_user.id
+            }
+
+            try:
+                response = requests.post(f"{API_ENDPOINT}post/", json=data)
+
+                if response.status_code == 201:
+                    keyboard = [
+                        [InlineKeyboardButton("Add New Expense", callback_data='add'),
+                         InlineKeyboardButton("List Expenses", callback_data='list'),
+                         InlineKeyboardButton("Cancel", callback_data='cancel')]
+                    ]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                    del context.user_data['event']  # Clear the event after saving
+                    await update.message.reply_text("Data saved successfully!", reply_markup=reply_markup)
+                    return CHOOSING
+                else:
+                    keyboard = [
+                        [InlineKeyboardButton("Retry", callback_data='retry'),
+                         InlineKeyboardButton("Cancel", callback_data='cancel')]
+                    ]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                    await update.message.reply_text(f"Error saving data. Status code: {response.status_code}",
+                                                    reply_markup=reply_markup)
+                    return CHOOSING
+            except requests.RequestException as e:
+                keyboard = [[InlineKeyboardButton("Retry", callback_data='retry')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                await update.message.reply_text(f"Error connecting to the server: {str(e)}", reply_markup=reply_markup)
+                return CHOOSING
+        except ValueError:
+            # If not a valid price, treat as event name
+            context.user_data['event'] = update.message.text
+            await update.message.reply_text("Great! Now, what's the price?", reply_markup=reply_markup)
+            return CHOOSING
+
+    # If no previous event, this is a new event entry
+    context.user_data['event'] = update.message.text
+    await update.message.reply_text("Great! Now, what's the price?", reply_markup=reply_markup)
     return CHOOSING
-
 
 async def get_price(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
@@ -288,11 +326,9 @@ def main() -> None:
                 CallbackQueryHandler(fetch_expenses, pattern='^done$'),
                 CallbackQueryHandler(cancel, pattern='^cancel$'),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, get_event),
-                MessageHandler(filters.TEXT & ~filters.COMMAND, get_price),
             ],
         },
         fallbacks=[CommandHandler("cancel", cancel)],
-        conversation_timeout=86400,
     )
 
     application.add_handler(conv_handler)
