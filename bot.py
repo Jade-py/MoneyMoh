@@ -277,6 +277,7 @@ def main() -> None:
                       CommandHandler("list", fetch_expenses)],
         states={
             CHOOSING: [
+                CallbackQueryHandler(button_click, pattern='^(add|list)$'),
                 CallbackQueryHandler(calendar_handler, pattern='^date_'),
                 CallbackQueryHandler(fetch_expenses, pattern='^done$'),
                 CallbackQueryHandler(cancel, pattern='^cancel$'),
