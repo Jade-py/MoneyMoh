@@ -15,23 +15,22 @@ env.read_env()
 # Replace with your actual API endpoint
 API_ENDPOINT = "http://127.0.0.1:8000/"
 
-# Replace with your Telegram Bot Token
 TOKEN = os.environ["BOT_TOKEN"]
 
-# Define conversation states
+# The BOT will operate in only one conversation state
 CHOOSING = 0
 
 
 def create_calendar(year, month):
     keyboard = []
-    # Add month and year at the top
+    # Month and year at the top
     keyboard.append([InlineKeyboardButton(f"{calendar.month_name[month]} {year}", callback_data="ignore")])
 
-    # Add days of the week as the second row
+    # Ddays of the week as the second row
     week_days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
     keyboard.append([InlineKeyboardButton(day, callback_data="ignore") for day in week_days])
 
-    # Add the calendar dates
+    # Calendar dates
     month_calendar = calendar.monthcalendar(year, month)
     for week in month_calendar:
         row = []
@@ -42,7 +41,7 @@ def create_calendar(year, month):
                 row.append(InlineKeyboardButton(str(day), callback_data=f"date_{year}-{month:02d}-{day:02d}"))
         keyboard.append(row)
 
-    # Add navigation buttons
+    # Navigation buttons
     keyboard.append([
         InlineKeyboardButton("<<", callback_data=f"prev_{year}_{month}"),
         InlineKeyboardButton("Done", callback_data="done"),
@@ -54,6 +53,7 @@ def create_calendar(year, month):
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    # User is greeted with option to add or list a new expense
     keyboard = [
         [InlineKeyboardButton("Add Expense", callback_data='add'),
          InlineKeyboardButton("List Expenses", callback_data='list'),
@@ -65,6 +65,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
 
 async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    # The BOT gives two buttons in the whole conversation for the user to choose from
     keyboard = [[InlineKeyboardButton("Cancel", callback_data='cancel')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     query = update.callback_query
@@ -78,17 +79,10 @@ async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         calendar_markup = create_calendar(now.year, now.month)
         await query.edit_message_text("Please select date(s):", reply_markup=calendar_markup)
         return CHOOSING
-    elif query.data == 'cancel':
-        await query.edit_message_text("Operation cancelled. Type /start to begin again")
-        return ConversationHandler.END
-    elif query.data == 'retry':
-        query = update.callback_query
-        await query.answer()
-        await query.edit_message_text("Let's try again. What's the event name?", reply_markup=reply_markup)
-        return CHOOSING
 
 
 async def calendar_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    # The navigation and selection of dates is handled here
     query = update.callback_query
     await query.answer()
 
@@ -255,6 +249,15 @@ async def fetch_expenses(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     return CHOOSING
 
 
+async def list_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    now = datetime.now()
+    calendar_markup = create_calendar(now.year, now.month)
+    await update.message.reply_text("Please select date(s):", reply_markup=calendar_markup)
+    context.user_data['selected_dates'] = set()
+    return CHOOSING
+
+
+
 async def retry(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
     await query.answer()
@@ -274,7 +277,7 @@ def main() -> None:
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start),
                       CommandHandler("add", add_expenses),
-                      CommandHandler("list", fetch_expenses)],
+                      CommandHandler("list", list_command)],
         states={
             CHOOSING: [
                 CallbackQueryHandler(button_click, pattern='^(add|list)$'),
