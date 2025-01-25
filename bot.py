@@ -277,7 +277,8 @@ def main() -> None:
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start),
                       CommandHandler("add", add_expenses),
-                      CommandHandler("list", list_command)],
+                      CommandHandler("list", list_command),
+                      CallbackQueryHandler(list_command, pattern='^list$'),],
         states={
             CHOOSING: [
                 CallbackQueryHandler(button_click, pattern='^(add|list)$'),
