@@ -205,7 +205,7 @@ async def fetch_expenses(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     selected_dates = context.user_data.get('selected_dates', set())
     if not selected_dates:
         await query.edit_message_text("No dates selected. Please select dates first. /start again")
-        return CHOOSING
+        return ConversationHandler.END
 
     print("Selected dates: ", selected_dates)
     keyboard = [
