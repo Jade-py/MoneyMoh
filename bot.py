@@ -53,6 +53,8 @@ def create_calendar(year, month):
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    if context.user_data:
+        context.user_data.clear()
     # User is greeted with option to add or list a new expense
     keyboard = [
         [InlineKeyboardButton("Add Expense", callback_data='add'),
@@ -249,6 +251,14 @@ async def fetch_expenses(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     return CHOOSING
 
 
+async def add_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    if update.callback_query:
+        await update.callback_query.answer()
+        await update.callback_query.edit_message_text("What's the event name?")
+    else:
+        await update.message.reply_text("What's the event name?")
+    return CHOOSING
+
 
 async def list_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     if update.callback_query:
@@ -283,6 +293,7 @@ def main() -> None:
         entry_points=[CommandHandler("start", start),
                       CommandHandler("add", add_expenses),
                       CommandHandler("list", list_command),
+                      CallbackQueryHandler(add_command, pattern='^add$'),
                       CallbackQueryHandler(list_command, pattern='^list$'),],
         states={
             CHOOSING: [
