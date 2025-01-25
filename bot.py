@@ -252,7 +252,8 @@ async def fetch_expenses(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 async def list_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     now = datetime.now()
     calendar_markup = create_calendar(now.year, now.month)
-    await update.message.reply_text("Please select date(s):", reply_markup=calendar_markup)
+    await update.callback_query.answer()
+    await update.callback_query.edit_message_text("Please select date(s):", reply_markup=calendar_markup)
     context.user_data['selected_dates'] = set()
     return CHOOSING
 
